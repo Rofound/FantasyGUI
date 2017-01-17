@@ -1,0 +1,13 @@
+.cvs{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background: #eee;
+}
+
+.mouseD{
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  background: none;
+}
