@@ -1,0 +1,72 @@
+*{
+  margin: 0px;
+  padding: 0px;
+}
+
+html{
+  height: 100%;
+}
+
+body{
+  height: 100%;
+  background: #eee;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  color: #333;
+  font-size: 20px;
+}
+
+#loginBox{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /*width: 400px;*/
+}
+
+#loginBox>.loginBox{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+#loginBox>.flexable{
+  margin: 15px 0;
+}
+
+.btn{
+  border: 1px solid #333;
+  text-decoration: none;
+  text-align: center;
+  color: #333;
+  /*display: block !important;*/
+}
+.btn:focus{
+  background: rgba(108, 118, 238,1);
+
+  border-color: rgba(255,255,255,1) !important;
+  color: #eee;
+}
+.btn:active{
+  background: rgba(108, 118, 238,0.5);
+  color: #333;
+}
+
+.loginBox>input{
+  background: none;
+  border: 0;
+  border-bottom: 1px solid #aaa;
+  width: 240px;
+
+  font-size: 1.2em;
+  color: #777;
+}
+#loginBox>#smt_btn{
+  display: block;
+  align-self: stretch;
+  padding: 5px;
+  border-color: #aaa;
+
+  font-size: 20px;
+}

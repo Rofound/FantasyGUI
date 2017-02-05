@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mesh Distortion</title>
+    <link rel="stylesheet" href="../lib/init.css" media="screen" title="no title">
+    <script type="text/javascript" src="../lib/init.js"></script>
+    <script type="text/javascript">
+      addEventListener('load',function (e){
+      /*
+      实现基于网格的扭曲
+      */
+      // --------------------------------
+      until.init();
+      var c=until.ctx;
+
+      var img=document.createElement('img');
+      img.src="images/pebble-light.jpg";
+
+      var imgUnits=[];
+      for(var i=0;i<3;i++){
+        imgUnits[i]=[];
+        for(var j=0;j<3;j++){
+          imgUnits[i][j]=c.getImageData(i*30,j*30,30,30);
+        }
+      }
+
+      setInterval(function (){
+        for(var i=0;i<3;i++){
+          for(var j=0;j<3;j++){
+            var x=i*30;
+            var y=j*30;
+            c.clearRect(0,0,innerWidth,innerHeight);
+            c.save();
+            c.translate(x,y);
+            c.rotate(Math.PI/180*until.mx/10);
+            // c.rotate(Math.PI/180*30);
+            c.drawImage(img,-x,-y);
+            imgUnits[i][j]=c.getImageData(x,y,30,30);
+            c.restore();
+          }
+        }
+        c.clearRect(0,0,innerWidth,innerHeight);
+        for(var i=0;i<imgUnits.length;i++){
+          for(var j=0;j<imgUnits[i].length;j++){
+            c.save();
+            c.putImageData(imgUnits[i][j],innerWidth/2+i*32,innerHeight/2+j*32);
+            c.restore();
+          }
+        }
+      },30);
+
+
+
+
+
+
+
+      // --------------------------------
+      });
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>

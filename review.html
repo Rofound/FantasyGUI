@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>review</title>
+    <style media="screen">
+      * {
+        padding: 0px;
+        margin: 0px;
+      }
+      .window {
+        position: absolute;
+        left: 200px;
+        top: 100px;
+        width: 600px;
+        height: 400px;
+        border: 1px solid #333;
+
+        border-radius: 10px;
+      }
+      .bar {
+        display: flex;
+        position: relative;
+
+        /*border: 1px solid #333;*/
+        border-bottom: 1px solid #333;
+        padding: 5px;
+      }
+      .btn_group {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        width: 80px;
+        border: 1px solid #333;
+      }
+      .btn_group .fetch{
+        flex-grow: 1;
+      }
+      .bar .btn {
+        /*background: #aaa;*/
+        text-align: center;
+        text-decoration: none;
+        transition: .1s all;
+        padding: 0px;
+      }
+      .bar .btn:hover {
+        background: #aaa;
+      }
+      .bar>.btn_group {
+        right: -1px;
+        top: 60%;
+        background: #fff;
+        border-radius: 10px 0px 0px 10px;
+        overflow: hidden;
+      }
+      .window>.content {
+        padding: 5px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <div class="bar title">
+        <span class="content">Hello</span>
+        <span class="btn_group">
+          <a href="#" class="fetch btn max_f">+</a>
+          <a href="#" class="fetch btn min_f">-</a>
+          <a href="#" class="fetch btn close_f">x</a>
+        </span>
+      </div>
+      <div class="content">
+        <h1>hello</h1>
+      </div>
+    </div>
+  </body>
+</html>

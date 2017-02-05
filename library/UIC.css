@@ -1,0 +1,42 @@
+*{
+  padding: 0;
+  margin: 0;
+}
+
+html{
+  height: 100%;
+}
+
+body{
+  height: 100%;
+  background: #eee;
+}
+
+.root{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.frame{
+  /*width: 80%;*/
+  /*height: 90%;*/
+  /*border: 1px solid #333;*/
+}
+
+.input{
+  /*background: #aaa;*/
+  /*min-height: 20px;*/
+}
+.input.text{
+  /*min-width: 20px;*/
+}
+
+#ctrlFrame{
+  /*display: block;*/
+  /*position: fixed;*/
+  /*align-self: flex-start;*/
+  /*height: 20px;*/
+  flex-grow: 0;
+}

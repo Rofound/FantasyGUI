@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>scale</title>
+    <script type="text/javascript" src="../lib/init.js"></script>
+    <link rel="stylesheet" href="../lib/init.css" media="screen" title="no title">
+    <script type="text/javascript">
+      addEventListener('load',function (e){
+      // ----------------------------------
+      until.init();
+      var c=until.ctx;
+
+      // 添加标识点
+      var flagP=function (x,y,fSize,color){
+        c.save();
+        c.beginPath();
+        c.fillStyle=color||"#34f";
+        c.arc(x||0,y||0,fSize||10,0,Math.PI*2);
+        c.fill();
+        c.restore();
+      }
+
+      var opx=0,opy=0;
+      var t=0;
+      setInterval(function (){
+        c.clearRect(0,0,innerWidth,innerHeight);
+
+        var px=innerWidth/2-75;
+        var py=innerHeight/2-75;
+
+        // 变换点
+        var op={
+          x: until.mx,
+          y: until.my,
+          // x: (innerWidth/2)+Math.sin(t+=0.01)*150,
+          // y: (innerHeight/2)+Math.cos(t)*50,
+        }
+        var ops=[];
+        // 这是原像
+        c.save();
+        c.fillStyle="#77a";
+        for(var i=0;i<10;i++){
+          ops[i]=[];
+          for(var j=0;j<10;j++){
+            var x=px+i*15;
+            var y=py+j*15;
+            c.beginPath();
+            c.arc(x,y,5,0,Math.PI*2);
+            c.fill();
+            ops[i][j]={x: x,y: y};
+          }
+        }
+        c.restore();
+
+        // 变像
+        c.save();
+        c.fillStyle="#e27";
+        c.strokeStyle="#333";
+        for(var i=0;i<10;i++){
+          for(var j=0;j<10;j++){
+            var x=px+i*15;
+            var y=py+j*15;
+            // 当前点离变换点的距离
+            var dx=Math.abs(op.x-x);
+            var dy=Math.abs(op.y-y);
+            var m=(op.x-x)*3+x;
+            var n=(op.y-y)*3+y;
+
+            // 进行第二次变换
+            // if(op.x-m<5){
+              m+=(op.x-m)*dx/400;
+              n+=(op.y-n)*dy/400;
+            // }
+            c.beginPath();
+            c.arc(m,n,5,0,Math.PI*2);
+            c.fill();
+
+            // 连接原像和变像的线
+            c.beginPath();
+            c.moveTo(ops[i][j].x,ops[i][j].y);
+            c.lineTo(m,n);
+            c.stroke();
+          }
+        }
+        c.restore();
+        flagP(op.x,op.y,8);
+      },30);
+      // ----------------------------------
+    });
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>
