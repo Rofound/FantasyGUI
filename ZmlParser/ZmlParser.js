@@ -1,4 +1,18 @@
 addEventListener('load',function (){
+  let atrSimpleMap={
+    'text': 'textContent',
+    'class': 'className',
+    'for': 'htmlFor',
+  }
+  let symSimpleMap={
+    '.': 'className',
+    '#': 'id',
+    '~': 'textContent',
+    '@': 'href',
+    '-': 'src',
+    '*': 'charset',
+    '^': 'charset',
+  }
   let ZmlParser=function (){
     let key='',keyType='';
     // 当前原子组的性质
@@ -72,21 +86,6 @@ addEventListener('load',function (){
       '>': true,
       '?': true,
     }
-    let atrSimpleMap={
-      'text': 'textContent',
-      'class': 'className',
-      'for': 'htmlFor',
-    }
-    let symSimpleMap={
-      '.': 'className',
-      '#': 'id',
-      '~': 'textContent',
-      '@': 'href',
-      '-': 'src',
-      '*': 'charset',
-      '^': 'charset',
-    }
-
     let isType=function (t){
       return ZMLTYPE[t];
     }
@@ -103,7 +102,6 @@ addEventListener('load',function (){
         DOM.setAttribute(key,value);
       }
     }
-
     // 使用原子上下文构建DOM
     // 需要分别指定前一个原子，当前原子和下一个原子
     let build=function (pA,cA,lA){
@@ -153,7 +151,6 @@ addEventListener('load',function (){
         scope.pop();
       }
     }
-
     // 原子组合器，构建原子，将分散的字符组合成原子
     // 需要指定类型和字符
     let atomCombiner=function (type,char){
@@ -198,56 +195,54 @@ addEventListener('load',function (){
       }
       key.value+=char;
     }
-
     // 根据上下文收集构成原子的字符序列
     // 需要分别指定前一个字符，当前字符和下一个字符
     let collection=function (pC,cC,lC){
-    if(cC==='\0'){
-      // 结束标识
-      atomCombiner('end','');
-    }else if(isQ(cC)){
-      if((atomGroupProperty===''||isAtomGProStrStart)&&quot===''){
-        // 开口
-        quot=cC;
-      }else if(isNormal){
+      if(cC==='\0'){
+        // 结束标识
+        atomCombiner('end','');
+      }else if(isQ(cC)){
+        if((atomGroupProperty===''||isAtomGProStrStart)&&quot===''){
+          // 开口
+          quot=cC;
+        }else if(isNormal){
+          atomCombiner('key',cC);
+        }else if(quot===cC){
+          // 封口
+          quot='';
+        }else{
+          atomCombiner('key',cC);
+        }
+      }else if(isQ(quot)){
+        if(cC==='^'&&!isNormal){
+          isNormal=true;
+        }else{
+          atomCombiner('key',cC);
+          isNormal=false;
+        }
+      }else if(isS(pC)&&simpleSymbol[cC]&&(!isS(lC))&&atomGroupProperty===''){
+        atomCombiner('_'+cC,cC);
+        if(isQ(lC)){
+          isAtomGProStrStart=true;
+        }
+      }else if(funcSymbol[cC]&&atomGroupProperty===''){
+        if(pC==='*'&&cC==='='){
+          atomCombiner('*=','*=');
+        }else{
+          atomCombiner(cC,cC);
+        }
+        if(isQ(lC)){
+          isAtomGProStrStart=true;
+        }
+      }else if(isS(cC)){
+        // 连续空白字符视为一个空格字符
+        if(!isS(pC)){
+          atomCombiner(' ',' ');
+        }
+      }else if(!(cC==='*'&&lC==='=')){
         atomCombiner('key',cC);
-      }else if(quot===cC){
-        // 封口
-        quot='';
-      }else{
-        atomCombiner('key',cC);
       }
-    }else if(isQ(quot)){
-      if(cC==='^'&&!isNormal){
-        isNormal=true;
-      }else{
-        atomCombiner('key',cC);
-        isNormal=false;
-      }
-    }else if(isS(pC)&&simpleSymbol[cC]&&(!isS(lC))&&atomGroupProperty===''){
-      atomCombiner('_'+cC,cC);
-      if(isQ(lC)){
-        isAtomGProStrStart=true;
-      }
-    }else if(funcSymbol[cC]&&atomGroupProperty===''){
-      if(pC==='*'&&cC==='='){
-        atomCombiner('*=','*=');
-      }else{
-        atomCombiner(cC,cC);
-      }
-      if(isQ(lC)){
-        isAtomGProStrStart=true;
-      }
-    }else if(isS(cC)){
-      // 连续空白字符视为一个空格字符
-      if(!isS(pC)){
-        atomCombiner(' ',' ');
-      }
-    }else if(!(cC==='*'&&lC==='=')){
-      atomCombiner('key',cC);
     }
-  }
-
     // 是否提前结束了
     let isBeforeOver=false;
     this.parse=function (zmlSrc){
@@ -272,6 +267,16 @@ addEventListener('load',function (){
     }
     this.getTree=function (){
       return tree;
+    }
+  }
+  ZmlParser.prototype.configSymbol=function (){
+    if(config){
+      symSimpleMap=config;
+    }
+  }
+  ZmlParser.prototype.configShorthand=function (config){
+    if(config){
+      atrSimpleMap=config;
     }
   }
   mod.zml=new ZmlParser();
