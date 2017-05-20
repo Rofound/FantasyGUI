@@ -1,13 +1,13 @@
-html{
-  head{
+html {
+  head {
     meta charset=utf-8
     title Hello Zml!
     link href=main.css
     script src=main.js
   }
-  body{
-    div{
-      text{
+  body {
+    div {
+      text {
         Hello Zml!
       }
     }

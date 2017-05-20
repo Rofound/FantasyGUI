@@ -1,92 +1,279 @@
-addEventListener('load',function (e){
-  let {zmlSrc}=mod;
-  // 语法树
-  let tree={};
-  let co={};
-  let key='';
-  let ks=[];
+addEventListener('load',function (){
+  let ZmlParser=function (){
+    let key='',keyType='';
+    // 当前原子组的性质
+    let atomGroupProperty='';
+    let prvChar='',curChar='',ltChar='';
+    let prvAtom='',curAtom='',ltAtom='';
+    let isNormal=false;
+    let isNum=false;
+    let quot='';
+    let tree={};
+    let curObj=null;
+    let scope=[];
+    let SPACE={
+      ' ': true,
+      '\t': true,
+      '\n': true,
+      '\0': true,
+    }
+    let QUOT={
+      '\'': true,
+      '"': true,
+    }
+    let ZMLTYPE={
+      'string': true,
+      'boolean': true,
+      'number': true,
+    }
+    let funcSymbol={
+      '{': true,
+      '}': true,
+      ':': true,
+      '\'': true,
+      '=': true,
+      '*=': true,
+      '"': true,
+    }
+    let propertySymbol={
+      ':': true,
+      '=': true,
+      '*=': true,
+    }
+    let simpleSymbol={
+      '^': true,
+      '~': true,
+      '`': true,
+      '!': true,
+      '@': true,
+      '#': true,
+      '$': true,
+      '%': true,
+      '&': true,
+      '*': true,
+      '(': true,
+      ')': true,
+      '_': true,
+      '+': true,
+      '-': true,
+      '=': true,
+      '[': true,
+      ']': true,
+      '{': true,
+      '}': true,
+      ';': true,
+      '\\': true,
+      ':': true,
+      '|': true,
+      ',': true,
+      '.': true,
+      '/': true,
+      '<': true,
+      '>': true,
+      '?': true,
+    }
+    let atrSimpleMap={
+      'text': 'textContent',
+      'class': 'className',
+      'for': 'htmlFor',
+    }
+    let symSimpleMap={
+      '.': 'className',
+      '#': 'id',
+      '~': 'textContent',
+      '@': 'href',
+      '-': 'src',
+      '*': 'charset',
+      '^': 'charset',
+    }
 
-  let boundryQuots={
-    '{': true,
-    '}': true,
-    '\'': true,
-    '"': true,
-  }
-  let keywordQuots={
-    ',': true,
-    '.': true,
-    '#': true,
-  }
-  let spaceQuots={
-    ' ': true,
-    '\n': true,
-    '\t': true,
-  }
-
-  let isKQ=function (k){
-    return keywordQuots[k];
-  }
-  let isS=function (k){
-    return spaceQuots[k];
-  }
-
-  // 是否开始收集键
-  let isSKC=true;
-
-  // 上一个字符
-  let ltC='';
-  // 未封口的边界键集,越靠后说明嵌套越深
-  let keysBs=[];
-  // 上一次是否划界操作
-  let ltIsBdy=false;
-  for(let i=0;i<zmlSrc.length;i++){
-    let c=zmlSrc[i];
-    if(c==='{'){
-      // 在这里打断键的收集过程并使键开口
-      console.log(key+'开始划界');
-      isSKC=false;
-      keysBs.push(key);
-    }else if(c==='}'){
-      // 在这里打断键的收集过程并将最近的键封口
-      let kkey=keysBs.pop();
-      console.log(kkey+'已经结束');
-      isSKC=false;
-    }else if(isS(c)&&!isS(ltC)){
-      console.log(c);
-    }else if(isS(c)&&isS(ltC)){
-      // 出现了连续的空白字符
-      ltIsBdy=false;
-    }else{
-      if(!isSKC){
-        // 断点分隔
-        // console.log(key);
-        key='';
-      }
-      let s='';
-      if(isS(c)){
-        if(ltIsBdy){
-          s='';
-        }else{
-          s=' ';
-        }
+    let isType=function (t){
+      return ZMLTYPE[t];
+    }
+    let isS=function (c){
+      return SPACE[c]||false;
+    }
+    let isQ=function (c){
+      return QUOT[c]||false;
+    }
+    let setAttr=function (DOM,key,value){
+      if(Reflect.has(DOM,key)){
+        DOM[key]=value;
       }else{
-        s=c;
+        DOM.setAttribute(key,value);
       }
-
-      key+=s;
-      isSKC=true;
     }
-    ltC=c;
 
-    // 上一次划界记录
-    if(c==='{'||c==='}'){
-      ltIsBdy=true;
-      // console.log(c);
-    }else{
-      ltIsBdy=false;
+    // 使用原子上下文构建DOM
+    // 需要分别指定前一个原子，当前原子和下一个原子
+    let build=function (pA,cA,lA){
+      if(cA.type==='funcSymbol'&&cA.value===':'){
+        let d=document.createElement(lA.value);
+        tree[pA.value]=d;
+        curObj=d;
+        if(scope.length>0){
+          scope[scope.length-1].appendChild(d);
+        }
+      }else if(pA.type==='space'&&cA.type==='string'&&lA.type==='space'){
+        let d=document.createElement(cA.value);
+        curObj=d;
+        if(scope.length>0){
+          scope[scope.length-1].appendChild(d);
+        }
+      }else if(pA.type==='space'&&cA.type==='simpleSymbol'&&isType(lA.type)){
+        let key=symSimpleMap[cA.value];
+        if(curObj&&key){
+          setAttr(curObj,key,lA.value);
+        }
+      }else if(pA.type==='string'&&cA.type==='funcSymbol'&&isType(lA.type)){
+        let value,key=pA.value;
+        if(lA.type==='number'){
+          value=lA.value*1;
+        }else if(lA.type==='boolean'){
+          if(lA.value==='t'){
+            value=true;
+          }else{
+            value=false;
+          }
+        }else{
+          value=lA.value;
+        }
+        if(cA.value==='='){
+          let _=atrSimpleMap[pA.value];
+          if(typeof _!=='undefined'){
+            key=_;
+          }
+        }
+        if(curObj){
+          setAttr(curObj,key,value);
+        }
+      }else if(pA.type==='space'&&cA.type==='funcSymbol'&&cA.value==='{'&&lA.type==='space'){
+        scope.push(curObj);
+      }else if(pA.type==='space'&&cA.type==='funcSymbol'&&cA.value==='}'&&lA.type==='space'){
+        scope.pop();
+      }
+    }
+
+    // 原子组合器，构建原子，将分散的字符组合成原子
+    // 需要指定类型和字符
+    let atomCombiner=function (type,char){
+      if(type!==keyType){
+        if(atomGroupProperty===''&&(propertySymbol[char]||simpleSymbol[char])){
+          atomGroupProperty=char;
+        }else if(type===' '){
+          atomGroupProperty='';
+        }
+
+        // 类型判断
+        if(isNum){
+          key.type='number';
+        }else if(key.value==='false'||key.value==='true'){
+          key.type='boolean';
+          key.value=key.value[0];
+        }else if(key.value===' '){
+          key.type='space';
+        }else if(keyType[0]==='_'){
+          key.type='simpleSymbol';
+        }else if(funcSymbol[key.value]){
+          key.type='funcSymbol';
+        }else{
+          key.type='string';
+        }
+
+        ltAtom=key;
+        build(prvAtom,curAtom,ltAtom);
+        prvAtom=curAtom;
+        curAtom=ltAtom;
+        key={
+          type: 'unknow',
+          value: '',
+        }
+        isNum=true;
+        isAtomGProStrStart=false;
+        keyType=type;
+      }
+      let chCode=char.charCodeAt(0);
+      if(chCode<48||chCode>57){
+        isNum=false;
+      }
+      key.value+=char;
+    }
+
+    // 根据上下文收集构成原子的字符序列
+    // 需要分别指定前一个字符，当前字符和下一个字符
+    let collection=function (pC,cC,lC){
+    if(cC==='\0'){
+      // 结束标识
+      atomCombiner('end','');
+    }else if(isQ(cC)){
+      if((atomGroupProperty===''||isAtomGProStrStart)&&quot===''){
+        // 开口
+        quot=cC;
+      }else if(isNormal){
+        atomCombiner('key',cC);
+      }else if(quot===cC){
+        // 封口
+        quot='';
+      }else{
+        atomCombiner('key',cC);
+      }
+    }else if(isQ(quot)){
+      if(cC==='^'&&!isNormal){
+        isNormal=true;
+      }else{
+        atomCombiner('key',cC);
+        isNormal=false;
+      }
+    }else if(isS(pC)&&simpleSymbol[cC]&&(!isS(lC))&&atomGroupProperty===''){
+      atomCombiner('_'+cC,cC);
+      if(isQ(lC)){
+        isAtomGProStrStart=true;
+      }
+    }else if(funcSymbol[cC]&&atomGroupProperty===''){
+      if(pC==='*'&&cC==='='){
+        atomCombiner('*=','*=');
+      }else{
+        atomCombiner(cC,cC);
+      }
+      if(isQ(lC)){
+        isAtomGProStrStart=true;
+      }
+    }else if(isS(cC)){
+      // 连续空白字符视为一个空格字符
+      if(!isS(pC)){
+        atomCombiner(' ',' ');
+      }
+    }else if(!(cC==='*'&&lC==='=')){
+      atomCombiner('key',cC);
     }
   }
-  // console.log(keysBs);
-  // console.log(zmlSrc.length);
-  // console.log(String.fromCharCode(10)+'a');
+
+    // 是否提前结束了
+    let isBeforeOver=false;
+    this.parse=function (zmlSrc){
+      for(let i=0;i<zmlSrc.length;i++){
+        let c=zmlSrc[i];
+        ltChar=c;
+        collection(prvChar,curChar,ltChar);
+        prvChar=curChar;
+        curChar=ltChar;
+        // 结束符号
+        if(c==='\0'){
+          collection(prvChar,curChar,'\0');
+          collection(curChar,'\0','');
+          isBeforeOver=true;
+          break;
+        }
+      }
+      if(!isBeforeOver){
+        collection(prvChar,curChar,'\0');
+        collection(curChar,'\0','');
+      }
+    }
+    this.getTree=function (){
+      return tree;
+    }
+  }
+
+  mod.zml=new ZmlParser();
 });
