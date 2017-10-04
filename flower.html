@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style media="screen">
+      html,body{
+        margin: 0px;
+        padding: 0px;
+        height: 100%;
+        background: #eee;
+      }
+      canvas{
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+      #blessing{
+        position: fixed;
+        right: 8px;
+        top: 6px;
+        color: #eaeaea;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <span id="blessing">飞燕，中秋快乐乐乐乐</span>
+  </body>
+</html>
+<script type="text/javascript">
+addEventListener('load',function (){
+  let cvs=document.querySelector('canvas');
+  let drawable={}
+  let ctx=cvs.getContext('2d');
+  let addDrawable=function (flag,o){
+    if(!Reflect.has(drawable,flag)&&Reflect.has(o,'draw')){
+      drawable[flag]=o;
+    }
+  }
+  let time=0;
+  let timeZone=1;
+  let draw=function (){
+    time+=timeZone;
+    ctx.save();
+    ctx.fillStyle='rgba(200,200,200,0.6)';
+    ctx.fillRect(0,0,innerWidth,innerHeight);
+    ctx.restore();
+    for(let i in drawable){
+      if(drawable[i].draw){
+        drawable[i].draw(time);
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  let resizeFn=function (){
+    cvs.width=innerWidth;
+    cvs.height=innerHeight;
+  }
+  resizeFn();
+  addEventListener('resize',function (){
+    resizeFn();
+  })
+  draw();
+  let mx=0,my=0;
+  addEventListener('mousemove',function (e){
+    mx=e.clientX;
+    my=e.clientY;
+  });
+  let rgba=function (r,g,b,a){
+    return 'rgba('+[Math.ceil(r),Math.ceil(g),Math.ceil(b),Math.ceil(a)].join(',')+')'
+  }
+  let n=10;
+  addDrawable('color',{
+    draw: function (t){
+      let gradient=ctx.createRadialGradient(0,100,240,200,100,0);
+      ctx.strokeStyle=gradient;
+      ctx.fillStyle=gradient;
+      for(let i=0;i<n;i++){
+        gradient.addColorStop((i+1)/n,rgba(n*n/(i+1)*255,i/n*255,i/n*Math.sin(t/n)*255,1));
+      }
+    }
+  });
+  addDrawable('inner',{
+    draw: function (t){
+      let time=t/40;
+      ctx.save();
+      ctx.translate(innerWidth/2,innerHeight/2);
+      for(let i=0;i<n;i++){
+        ctx.beginPath();
+        ctx.rotate(Math.PI/180*(360/n));
+        let ax=Math.sin(time)*30;
+        let ay=Math.cos(time)*120;
+        let bx=Math.sin(time/4)*100;
+        let by=Math.cos(time)*200;
+        let cx=Math.sin(time)*20;
+        let cy=Math.cos(time)*20;
+        ctx.moveTo(ax,ay);
+        let ps=[
+          [bx*2*Math.sin(time*0.1),by*2,Math.cos(cx/ax)*by,Math.sin(cy/ay)*ay,bx,ay*Math.tan(time)*ax*Math.sin(time)*0.05],
+          // [ax*2,cy*2,Math.sin(ax/by)*cy,Math.cos(ay/bx)*cx,bx,cy*Math.tan(time)*ax/1.2],
+        ];
+        for(let j=0;j<ps.length;j++){
+          ctx.bezierCurveTo(ps[j][0],ps[j][1],ps[j][2],ps[j][3],ps[j][4],ps[j][5]);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.save();
+        ctx.globalAlpha=0.2;
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+  });
+  addDrawable('inner2',{
+    draw: function (t){
+      let time=t/40;
+      ctx.save();
+      ctx.translate(innerWidth/2,innerHeight/2);
+      for(let i=0;i<n;i++){
+        ctx.beginPath();
+        ctx.rotate(Math.PI/180*(360/n));
+        let ax=Math.sin(time)*30;
+        let ay=Math.cos(time)*20;
+        let bx=Math.sin(time/2)*200;
+        let by=Math.cos(time)*200;
+        let cx=Math.sin(time)*200;
+        let cy=Math.cos(time)*120;
+        ctx.moveTo(ax,ay);
+        let ps=[
+          [ax,cx,bx,cy,by/2,ay*Math.sin(by/ay)],
+          // [bx*2,by*2,Math.cos(cx/bx)*by,Math.sin(cy/ay)*bx,bx,ay],
+          // [ax*2,cy*2,Math.sin(ax/by)*cy,Math.cos(ay/bx)*cx,bx,cy],
+        ];
+        for(let j=0;j<ps.length;j++){
+          ctx.bezierCurveTo(ps[j][0],ps[j][1],ps[j][2],ps[j][3],ps[j][4],ps[j][5]);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.save();
+        ctx.globalAlpha=0.2;
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+  });
+});
+</script>
