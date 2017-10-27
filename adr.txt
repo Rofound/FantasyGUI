@@ -1,3 +1,5 @@
 http://m.fanso2o.com/activity/get;jsessionid=0314DAB659D429AD6F9307BA04F3A96E?activityId=8e309d156b444eb0ba2a1ab20d167dfa&appId=0bc29bf4f43845dcaf5362c9e48375ea&shopId=6647
 
+http://m.fanso2o.com/activity/draw
+
 userName=18875648052&activityId=8e309d156b444eb0ba2a1ab20d167dfa&appId=0bc29bf4f43845dcaf5362c9e48375ea&cardNum=&price=&shopId=6647&key=aaad7391-5e2d-43c9-860b-2220bc31bf68&keyInSession=25d9cfdf-9437-46e1-8e79-6e9d8b9c7c33&activityCode=
